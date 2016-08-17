@@ -1,0 +1,29 @@
+{
+  "name": "colling-media/zipwhip-php-api",
+  "description": "ZipWhip PHP API",
+  "keywords": ["zipwhip", "sms", "api", "wrapper"],
+  "homepage": "https://github.com/Colling-Media/ZipWhip-PHP-API",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Brian Logan",
+      "email": "logan@collingmedia.com",
+      "homepage": "https://collingmedia.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=5.6.4"
+  },
+  "require-dev": {
+  },
+  "autoload": {
+    "psr-4": {
+      "CollingMedia\\ZipWhipClient\\": "src"
+    }
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "dev"
+}
