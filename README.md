@@ -29,6 +29,7 @@ $zipWhip->sendMessage($number, $message); //Yay! Your message was sent, and you 
 `$zipWhip->listContacts();`
 
 `$zipWhip->saveContact($contactInfo);`
+
 *For contact info, it must be an array, follow [thier guide](https://www.zipwhip.com/api/curl/contact/save) to see what is allowed.
 
 `$zipWhip->deleteConversation($fingerprint);`
