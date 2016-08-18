@@ -1,5 +1,7 @@
 # ZipWhip-PHP-API [WIP]
 
+[![Packagist](https://img.shields.io/packagist/dm/colling-media/zipwhip-php-api.svg?maxAge=2592000)](https://packagist.org/packages/colling-media/zipwhip-php-api)
+
 Make sure you have a ZipWhip account! Visit [zipwhip.com](http://zipwhip.com) and register to get your username and password!
 
 ## Installation
