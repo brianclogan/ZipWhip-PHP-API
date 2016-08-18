@@ -19,7 +19,7 @@
   },
   "autoload": {
     "psr-4": {
-      "CollingMedia\\ZipWhipClient\\": "src"
+      "CollingMedia\\": "src"
     }
   },
   "config": {
