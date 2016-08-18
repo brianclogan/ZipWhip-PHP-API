@@ -10,7 +10,7 @@ namespace CollingMedia;
 
 
 class ZipWhipClient {
-
+    const BASE_URL = "https://api.zipwhip.com/";
     /**
      * @var string
      */
@@ -31,19 +31,10 @@ class ZipWhipClient {
      * @throws \Exception
      */
     static function authenticate($userid, $password) {
+        $result = static::post("user/login", array("username" => $userid, "password" => $password));
 
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://api.zipwhip.com/user/login");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, "username={$userid}&password={$password}");
-        curl_setopt($ch, CURLOPT_POST, 1);
-        $result = json_decode(curl_exec($ch));
-        if (curl_errno($ch)) {
-            throw new \Exception('Error:' . curl_error($ch));
-        }
-        curl_close ($ch);
-        if($result->success == true) {
-            $zipwhipClient = new ZipWhipClient($result->response);
+        if ($result['success'] == true) {
+            $zipwhipClient = new ZipWhipClient($result['response']);
             return $zipwhipClient;
         } else {
             throw new \Exception("ZIPWHIP: Unable to login, check your user credentials");
@@ -56,21 +47,12 @@ class ZipWhipClient {
      * @throws \Exception
      */
     public function deleteContact($contactid) {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://api.zipwhip.com/contact/delete");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, "contact={$contactid}&session={$this->api_key}");
-        curl_setopt($ch, CURLOPT_POST, 1);
-        $result = json_decode(curl_exec($ch));
-        if (curl_errno($ch)) {
-            throw new \Exception('Error:' . curl_error($ch));
-        }
-        curl_close ($ch);
-        if($result->success == true) {
-            return $result->response;
-        } else {
+        $result = $this->post("contact/delete", array("contact" => $contactid, "session" => $this->api_key));
+
+        if (!array_key_exists('success', $result)) {
             return false;
         }
+        return $result['success'];
     }
 
     /**
@@ -78,18 +60,10 @@ class ZipWhipClient {
      * @throws \Exception
      */
     public function listContacts() {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://api.zipwhip.com/contact/list");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, "session=41048e5c-2334-4d99-ac82-c5de15ea15c6:309626613");
-        curl_setopt($ch, CURLOPT_POST, 1);
-        $result = json_decode(curl_exec($ch));
-        if (curl_errno($ch)) {
-            throw new \Exception('Error:' . curl_error($ch));
-        }
-        curl_close ($ch);
-        if($result->success == true) {
-            return $result->response;
+        $result = $this->post("contact/list", array("session" => $this->api_key));
+
+        if ($result['success'] == true) {
+            return json_encode($result['response']);
         } else {
             return false;
         }
@@ -103,24 +77,16 @@ class ZipWhipClient {
      */
     public function saveContact(array $contactInformation) {
         $query = [];
-        foreach($contactInformation AS $k => $v) {
-            $query[] = $k."=".$v;
+        foreach ($contactInformation AS $k => $v) {
+            $query[] = $k . "=" . $v;
         }
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://api.zipwhip.com/contact/save");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, implode("&", $query)."&session={$this->api_key}");
-        curl_setopt($ch, CURLOPT_POST, 1);
-        $result = json_decode(curl_exec($ch));
-        if (curl_errno($ch)) {
-            throw new \Exception('Error:' . curl_error($ch));
-        }
-        curl_close ($ch);
-        if($result->success == true) {
-            return $result->response;
-        } else {
+        $query['session'] = $this->api_key;
+        $result = $this->post("contact/save", $query);
+
+        if (!array_key_exists('success', $result)) {
             return false;
         }
+        return $result['success'];
     }
 
     /**
@@ -398,21 +364,39 @@ class ZipWhipClient {
      * @throws \Exception
      */
     public function sendMessage($number, $message) {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://api.zipwhip.com/message/send");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, "body={$message}&contacts=ptn:/{$number}&session={$this->api_key}");
-        curl_setopt($ch, CURLOPT_POST, 1);
-        $result = json_decode(curl_exec($ch));
-        if (curl_errno($ch)) {
-            throw new \Exception('Error:' . curl_error($ch));
-        }
-        curl_close ($ch);
-        if($result->success == true) {
-            return $result->response;
-        } else {
+        $result = $this->post("message/send",
+            array('body' => $message, 'contacts' => $number, 'session' => $this->api_key)
+        );
+
+        // TODO: For tracking the message sending progress you will want to capture the messageID.
+        // In the case of a 1:1 message it would be return $result['response']['root'];
+        if (!array_key_exists('success', $result)) {
             return false;
         }
+        return $result['success'];
+    }
+
+    private static function post($method, $parameters) {
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => sprintf("%s%s", static::BASE_URL, ltrim($method, "/")),
+            CURLOPT_POSTFIELDS => http_build_query($parameters),
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_ENCODING => "",
+            CURLOPT_HEADER => 0,
+            CURLOPT_POST => 1,
+//            CURLOPT_VERBOSE => 1,
+        ));
+
+        $response = json_decode(curl_exec($curl), true);
+        if (curl_errno($curl)) {
+            $curl_error = curl_error($curl);
+            curl_close($curl);
+            throw new \Exception(sprintf("Error: %s", $curl_error));
+        }
+        curl_close($curl);
+
+        return $response;
     }
 
     /**
