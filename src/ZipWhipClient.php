@@ -11,15 +11,27 @@ namespace CollingMedia;
 
 class ZipWhipClient {
 
+    /**
+     * @var string
+     */
     private $api_key;
 
     /**
      * ZipWhipClient constructor.
+     * @param $apiKey
+     */
+    public function __construct($apiKey) {
+        $this->api_key = $apiKey;
+    }
+
+    /**
      * @param $userid
      * @param $password
+     * @return ZipWhipClient
      * @throws \Exception
      */
-    public function __construct($userid, $password) {
+    static function authenticate($userid, $password) {
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://api.zipwhip.com/user/login");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -31,7 +43,8 @@ class ZipWhipClient {
         }
         curl_close ($ch);
         if($result->success == true) {
-            $this->api_key = $result->response;
+            $zipwhipClient = new ZipWhipClient($result->response);
+            return $zipwhipClient;
         } else {
             throw new \Exception("ZIPWHIP: Unable to login, check your user credentials");
         }
@@ -40,6 +53,7 @@ class ZipWhipClient {
     /**
      * @param $contactid
      * @return bool
+     * @throws \Exception
      */
     public function deleteContact($contactid) {
         $ch = curl_init();
@@ -61,6 +75,7 @@ class ZipWhipClient {
 
     /**
      * @return bool
+     * @throws \Exception
      */
     public function listContacts() {
         $ch = curl_init();
@@ -112,6 +127,7 @@ class ZipWhipClient {
      * @param $number
      * @param $message
      * @return bool
+     * @throws \Exception
      */
     public function sendMessage($number, $message) {
         $ch = curl_init();
