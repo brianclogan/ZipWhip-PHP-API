@@ -9,8 +9,7 @@
 namespace CollingMedia;
 
 
-class ZipWhipClient
-{
+class ZipWhipClient {
     const BASE_URL = "https://api.zipwhip.com/";
     /**
      * @var string
@@ -21,8 +20,7 @@ class ZipWhipClient
      * ZipWhipClient constructor.
      * @param $apiKey
      */
-    public function __construct($apiKey)
-    {
+    public function __construct($apiKey) {
         $this->api_key = $apiKey;
     }
 
@@ -32,8 +30,7 @@ class ZipWhipClient
      * @return ZipWhipClient
      * @throws \Exception
      */
-    static function authenticate($userid, $password)
-    {
+    static function authenticate($userid, $password) {
         $result = static::post("user/login", array("username" => $userid, "password" => $password));
 
         if ($result['success'] == true) {
@@ -49,8 +46,7 @@ class ZipWhipClient
      * @return bool
      * @throws \Exception
      */
-    public function deleteContact($contactid)
-    {
+    public function deleteContact($contactid) {
         $result = $this->post("contact/delete", array("contact" => $contactid, "session" => $this->api_key));
 
         if ($result['success'] == true) {
@@ -64,8 +60,7 @@ class ZipWhipClient
      * @return bool
      * @throws \Exception
      */
-    public function listContacts()
-    {
+    public function listContacts() {
         $result = $this->post("contact/list", array("session" => $this->api_key));
 
         if ($result['success'] == true) {
@@ -81,8 +76,7 @@ class ZipWhipClient
      * @return bool
      * @throws \Exception
      */
-    public function saveContact($contactInformation)
-    {
+    public function saveContact($contactInformation) {
         $query = [];
         foreach ($contactInformation AS $k => $v) {
             $query[] = $k . "=" . $v;
@@ -103,8 +97,7 @@ class ZipWhipClient
      * @return bool
      * @throws \Exception
      */
-    public function sendMessage($number, $message)
-    {
+    public function sendMessage($number, $message) {
         $result = $this->post("message/send",
             array('body' => $message, 'contacts' => $number, 'session' => $this->api_key)
         );
@@ -116,8 +109,7 @@ class ZipWhipClient
         }
     }
 
-    private static function post($method, $parameters)
-    {
+    private static function post($method, $parameters) {
         $curl = curl_init();
         curl_setopt_array($curl, array(
             CURLOPT_URL => sprintf("%s%s", static::BASE_URL, ltrim($method, "/")),
