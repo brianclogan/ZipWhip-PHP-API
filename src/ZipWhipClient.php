@@ -49,11 +49,10 @@ class ZipWhipClient {
     public function deleteContact($contactid) {
         $result = $this->post("contact/delete", array("contact" => $contactid, "session" => $this->api_key));
 
-        if ($result['success'] == true) {
-            return $result->response;
-        } else {
+        if (!array_key_exists('success', $result)) {
             return false;
         }
+        return $result['success'];
     }
 
     /**
@@ -64,7 +63,7 @@ class ZipWhipClient {
         $result = $this->post("contact/list", array("session" => $this->api_key));
 
         if ($result['success'] == true) {
-            return $result->response;
+            return json_encode($result['response']);
         } else {
             return false;
         }
@@ -84,11 +83,10 @@ class ZipWhipClient {
         $query['session'] = $this->api_key;
         $result = $this->post("contact/save", $query);
 
-        if ($result['success'] == true) {
-            return $result->response;
-        } else {
+        if (!array_key_exists('success', $result)) {
             return false;
         }
+        return $result['success'];
     }
 
     /**
@@ -102,11 +100,12 @@ class ZipWhipClient {
             array('body' => $message, 'contacts' => $number, 'session' => $this->api_key)
         );
 
-        if ($result['success'] == true) {
-            return true;
-        } else {
+        // TODO: For tracking the message sending progress you will want to capture the messageID.
+        // In the case of a 1:1 message it would be return $result['response']['root'];
+        if (!array_key_exists('success', $result)) {
             return false;
         }
+        return $result['success'];
     }
 
     private static function post($method, $parameters) {
